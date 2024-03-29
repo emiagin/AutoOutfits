@@ -1,0 +1,16 @@
+﻿{
+  "Name": "Auto Outfits",
+  "Author": "EmiAgin",
+  "Version": "1.0.0",
+  "Description": "Automatically change outfits depends on location/season",
+  "UniqueID": "EmiAgin.AutoOutfits",
+  "EntryDll": "AutoOutfits.dll",
+  "MinimumApiVersion": "3.0.0",
+  "UpdateKeys": [],
+  "Dependencies": [
+    {
+      "UniqueID": "PeacefulEnd.FashionSense",
+      "IsRequired": true
+    }
+  ]
+}

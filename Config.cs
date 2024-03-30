@@ -18,18 +18,12 @@ namespace AutoOutfits
 		public enum SeasonsEnum { All, Spring, Summer, Fall, Winter }
 		internal class FarmerOutfit
 		{
-			public PlayerInfoConfig FarmerInfo { get; private set; }
+			public long PlayerID { get; private set; }
 			public SeasonOutfit[] SeasonOutfits { get; set; }
 
-			public SeasonOutfit All => Outfit(SeasonsEnum.All);
-			public SeasonOutfit Spring => Outfit(SeasonsEnum.Spring);
-			public SeasonOutfit Summer => Outfit(SeasonsEnum.Summer);
-			public SeasonOutfit Fall => Outfit(SeasonsEnum.Fall);
-			public SeasonOutfit Winter => Outfit(SeasonsEnum.Winter);
-
-			public FarmerOutfit(PlayerInfoConfig farmerInfo)
+			public FarmerOutfit(long playerID)
 			{
-				FarmerInfo = farmerInfo;
+				PlayerID = playerID;
 				SeasonOutfits = new SeasonOutfit[Enum.GetNames(typeof(SeasonsEnum)).Length];
 				for(int i = 0; i < SeasonOutfits.Length; i++)
 				{
@@ -50,10 +44,6 @@ namespace AutoOutfits
 		internal class SeasonOutfit
 		{
 			public SeasonsEnum Season { get; set; }
-			public string Home => Values[LocationsEnum.Home];
-			public string Village => Values[LocationsEnum.Village];
-			public string Desert => Values[LocationsEnum.Desert];
-			public string Island => Values[LocationsEnum.Island];
 			public Dictionary<LocationsEnum, string> Values { get; set; } = new Dictionary<LocationsEnum, string>();
 
 			public SeasonOutfit(SeasonsEnum season)
@@ -74,11 +64,10 @@ namespace AutoOutfits
 
 		public void ResetToDefault()
 		{
-			var playerInfos = ModEntry.playerInfo.SaveFileInfos;
 			FarmerOutfits = new List<FarmerOutfit>();
-			foreach(var info in playerInfos)
+			foreach(var info in ModEntry.playerInfo.SaveFileInfos)
 			{
-				FarmerOutfits.Add(new FarmerOutfit(info));
+				FarmerOutfits.Add(new FarmerOutfit(info.PlayerID));
 			}
 		}
 
@@ -93,15 +82,16 @@ namespace AutoOutfits
 
 			configMenu.Unregister(ModEntry.modManifest);
 			configMenu.Register(ModEntry.modManifest, ResetToDefault, ApplyConfig);
+			
 
 			foreach(var farmer in FarmerOutfits)
 			{
-				configMenu.AddPageLink(ModEntry.modManifest, "page_" + farmer.FarmerInfo.PlayerID, () => farmer.FarmerInfo.FarmerName);
+				configMenu.AddPageLink(ModEntry.modManifest, "page_" + farmer.PlayerID, () => ModEntry.playerInfo.GetName(farmer.PlayerID));
 			}
 			foreach (var farmer in FarmerOutfits)
 			{
-				configMenu.AddPage(ModEntry.modManifest, "page_" + farmer.FarmerInfo.PlayerID, () => farmer.FarmerInfo.FarmerName);
-				CreatePageMenu(farmer, outfitIds[farmer.FarmerInfo.PlayerID].ToArray());
+				configMenu.AddPage(ModEntry.modManifest, "page_" + farmer.PlayerID, () => ModEntry.playerInfo.GetName(farmer.PlayerID));
+				CreatePageMenu(farmer, outfitIds[farmer.PlayerID].ToArray());
 			}
 		}
 
@@ -124,7 +114,7 @@ namespace AutoOutfits
 		}
 
 		internal IGenericModConfigMenuApi configMenu = null;
-		public Config()
+		public void SetConfigMenu()
 		{
 			configMenu = ModEntry.helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
 			if (configMenu is null)
@@ -133,9 +123,11 @@ namespace AutoOutfits
 				return;
 			}
 			configMenu.Register(ModEntry.modManifest, ResetToDefault, ApplyConfig);
-			
-			ResetToDefault();
 			UpdateModConfigMenu();
+		}
+		public Config()
+		{
+			ResetToDefault();
 		}
 	}
 }

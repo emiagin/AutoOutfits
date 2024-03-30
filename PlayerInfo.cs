@@ -23,40 +23,30 @@ namespace AutoOutfits
 	{
 		public static List<PlayerInfoConfig> GetAllSaveFileInfos()
 		{
-			// List to hold all the save file information
 			List<PlayerInfoConfig> saveFileInfos = new List<PlayerInfoConfig>();
-
-			// Get the path to the save files (this path is for Windows, it will be different for Mac/Linux)
 			string saveFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StardewValley", "Saves");
-
-			// Check if the save folder exists
 			if (!Directory.Exists(saveFolderPath))
 			{
 				ModEntry.monitor.Log($"WARNING: Save folder path does not exist", LogLevel.Debug);
 				return saveFileInfos;
 			}
 
-			// Iterate over each save folder
 			foreach (var directory in Directory.GetDirectories(saveFolderPath))
 			{
-				// The save file name is the same as the directory name
 				string saveFileName = Path.GetFileName(directory);
 				string saveFilePath = Path.Combine(directory, saveFileName);
 
-				// Make sure the file exists
 				if (File.Exists(saveFilePath))
 				{
-					// Parse the save game file
 					XDocument saveGame = XDocument.Load(saveFilePath);
 
 					// Retrieve the player's ID and name
 					long playerID = Convert.ToInt64(saveGame.Root.Element("player").Element("UniqueMultiplayerID").Value);
 					string farmerName = saveGame.Root.Element("player").Element("name").Value;
-					//ModEntry.monitor.Log($"farmerName = {farmerName}", LogLevel.Debug);
+					//ModEntry.monitor.Log($"farmerId = {playerID} farmerName = {farmerName}", LogLevel.Debug);
 					string[] outfitIds = GetOutfitIds(saveGame);
 					//ModEntry.monitor.Log($"outfitIds = {outfitIds}", LogLevel.Debug);
 
-					// Add the info to the list
 					saveFileInfos.Add(new PlayerInfoConfig
 					{
 						PlayerID = playerID,
@@ -121,6 +111,11 @@ namespace AutoOutfits
 		}
 		public PlayerInfoConfig CurrentPlayerInfo { get; private set; } = null;
 
+		public string GetName(long playerId)
+		{
+			var info = SaveFileInfos.FirstOrDefault(p => p.PlayerID == playerId);
+			return info.FarmerName;
+		}
 		public void OnSaveLoaded(object sender, SaveLoadedEventArgs ev)
 		{
 			long currentPlayerId = Game1.player.UniqueMultiplayerID;

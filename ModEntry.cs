@@ -24,6 +24,8 @@ namespace AutoOutfits
             monitor = Monitor;
 			modManifest = ModManifest;
 			playerInfo = new PlayerInfo();
+			config = helper.ReadConfig<Config>();
+
 			helper.Events.GameLoop.GameLaunched += OnGameLaunched;
 			helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
 			helper.Events.Player.Warped += OnPlayerWarped;
@@ -31,11 +33,11 @@ namespace AutoOutfits
 
 		private void OnPlayerWarped(object sender, WarpedEventArgs e)
 		{
-			monitor.Log($"old location = {e.OldLocation.Name}\nnew location = {e.NewLocation.Name}", LogLevel.Debug);
+			//monitor.Log($"old location = {e.OldLocation.Name}\nnew location = {e.NewLocation.Name}", LogLevel.Debug);
 			locationManager.SetLocation(e.NewLocation.Name);
 			foreach(var farmer in config.FarmerOutfits)
 			{
-				if(farmer.FarmerInfo.PlayerID == playerInfo.CurrentPlayerInfo.PlayerID)
+				if(farmer.PlayerID == playerInfo.CurrentPlayerInfo.PlayerID)
 				{
 					outfitManager.SetOutfit(farmer.GetOutfit(Config.SeasonsEnum.All, locationManager.CurrentPlayerLocation.Value));
 				}
@@ -45,7 +47,7 @@ namespace AutoOutfits
 		private void OnGameLaunched(object sender, GameLaunchedEventArgs ev)
         {
 			outfitManager = new OutfitManager();
-			config = helper.ReadConfig<Config>();
+			config.SetConfigMenu();
 		}
 
 		private void OnSaveLoaded(object sender, SaveLoadedEventArgs ev)

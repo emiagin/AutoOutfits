@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Linq;
+using StardewModdingAPI.Events;
 
 namespace AutoOutfits
 {
@@ -76,7 +78,7 @@ namespace AutoOutfits
 			}
 			catch(Exception e) 
 			{
-				ModEntry.monitor.Log($"WARNING: xItems = null, error = {e.Message}", LogLevel.Debug);
+				//ModEntry.monitor.Log($"WARNING: xItems = null, error = {e.Message}", LogLevel.Debug);
 				return outfitIds.ToArray();
 			}
 
@@ -106,8 +108,8 @@ namespace AutoOutfits
 
 	internal class PlayerInfo
 	{
-		internal static List<PlayerInfoConfig> saveFileInfos;
-		public static List<PlayerInfoConfig> SaveFileInfos
+		internal List<PlayerInfoConfig> saveFileInfos;
+		public List<PlayerInfoConfig> SaveFileInfos
 		{
 			get
 			{
@@ -116,6 +118,19 @@ namespace AutoOutfits
 				return saveFileInfos;
 			}
 
+		}
+		public PlayerInfoConfig CurrentPlayerInfo { get; private set; } = null;
+
+		public void OnSaveLoaded(object sender, SaveLoadedEventArgs ev)
+		{
+			long currentPlayerId = Game1.player.UniqueMultiplayerID;
+			CurrentPlayerInfo = SaveFileInfos.FirstOrDefault(p => p.PlayerID == currentPlayerId);
+		}
+
+		public PlayerInfo(long? currentPlayerId = null)
+		{
+			if(currentPlayerId != null)
+				CurrentPlayerInfo = SaveFileInfos.FirstOrDefault(p => p.PlayerID == currentPlayerId);
 		}
 	}
 }

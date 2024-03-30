@@ -15,6 +15,7 @@ namespace AutoOutfits
 {
 	class Config
 	{
+		public enum SeasonsEnum { All, Spring, Summer, Fall, Winter }
 		internal class FarmerOutfit
 		{
 			public PlayerInfoConfig FarmerInfo { get; private set; }
@@ -40,6 +41,11 @@ namespace AutoOutfits
 			{
 				return SeasonOutfits[(int)season];
 			}
+
+			public string GetOutfit(SeasonsEnum season, LocationsEnum location)
+			{
+				return Outfit(season).Values[location];
+			}
 		}
 		internal class SeasonOutfit
 		{
@@ -64,13 +70,11 @@ namespace AutoOutfits
 				Values[location] = outfitId;
 			}
 		}
-		internal enum SeasonsEnum { All, Spring, Summer, Fall, Winter }
-		internal enum LocationsEnum { Home, Village, Desert, Island }
 		public List<FarmerOutfit> FarmerOutfits { get; set; } = new List<FarmerOutfit>();
 
 		public void ResetToDefault()
 		{
-			var playerInfos = PlayerInfo.SaveFileInfos;
+			var playerInfos = ModEntry.playerInfo.SaveFileInfos;
 			FarmerOutfits = new List<FarmerOutfit>();
 			foreach(var info in playerInfos)
 			{

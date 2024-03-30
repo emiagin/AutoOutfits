@@ -6,17 +6,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AutoOutfits.Config;
 
 namespace AutoOutfits
 {
 	internal class OutfitManager
 	{
 		public Dictionary<long, List<string>> OutfitIds { get; private set; } = new Dictionary<long, List<string>>();
+		public string CurrentOutfitId { get; private set; }
 
 		internal IFashionSenseApi fashionSense;
 		public void UpdateOutfitIds()
 		{
-			var saveFileInfos = PlayerInfo.SaveFileInfos;
+			var saveFileInfos = ModEntry.playerInfo.SaveFileInfos;
 			foreach (var fileInfo in saveFileInfos)
 			{
 				List<string> outfitIds = new List<string>();
@@ -34,6 +36,11 @@ namespace AutoOutfits
 					}
 				}
 			}
+		}
+
+		public void SetOutfit(string outfitId)
+		{
+			fashionSense.SetCurrentOutfitId(outfitId, ModEntry.modManifest);
 		}
 
 		public OutfitManager()

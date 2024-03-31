@@ -15,7 +15,6 @@ namespace AutoOutfits
 {
 	class Config
 	{
-		public enum SeasonsEnum { All, Spring, Summer, Fall, Winter }
 		internal class FarmerOutfit
 		{
 			public long PlayerID { get; private set; }

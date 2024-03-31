@@ -40,7 +40,7 @@ namespace AutoOutfits
 		internal string currentPlayerLocationString;
 		public LocationsEnum? CurrentPlayerLocation => LocationConverter.Convert(currentPlayerLocationString);
 
-		public void SetLocation(string _currentPlayerLocation)
+		public void SetCurrentLocation(string _currentPlayerLocation)
 		{
 			currentPlayerLocationString = _currentPlayerLocation;
 		}

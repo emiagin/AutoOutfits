@@ -16,6 +16,7 @@ namespace AutoOutfits
 		internal static OutfitManager outfitManager;
 		internal static IManifest modManifest;
 		internal static LocationManager locationManager;
+		internal static SeasonManager seasonManager;
 		internal static PlayerInfo playerInfo;
 
 		public override void Entry(IModHelper helper)
@@ -29,18 +30,39 @@ namespace AutoOutfits
 			helper.Events.GameLoop.GameLaunched += OnGameLaunched;
 			helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
 			helper.Events.Player.Warped += OnPlayerWarped;
+			helper.Events.GameLoop.DayStarted += OnDayStarted;
+		}
+
+		private void OnDayStarted(object sender, DayStartedEventArgs e)
+		{
+			monitor.Log($"location = {Game1.player.currentLocation.Name}\nseason = {Game1.currentSeason}", LogLevel.Debug);
+			if(SeasonConverter.Convert(Game1.currentSeason) != seasonManager.CurrentSeason)
+				SetNewOutfit(Game1.currentSeason, Game1.player.currentLocation.Name);
 		}
 
 		private void OnPlayerWarped(object sender, WarpedEventArgs e)
 		{
 			//monitor.Log($"old location = {e.OldLocation.Name}\nnew location = {e.NewLocation.Name}", LogLevel.Debug);
-			locationManager.SetLocation(e.NewLocation.Name);
-			foreach(var farmer in config.FarmerOutfits)
+			SetNewOutfit(Game1.currentSeason, e.NewLocation.Name);
+		}
+
+		private void SetNewOutfit(string season, string location)
+		{
+			try
 			{
-				if(farmer.PlayerID == playerInfo.CurrentPlayerInfo.PlayerID)
+				locationManager.SetCurrentLocation(location);
+				seasonManager.SetCurrentSeason(season);
+				foreach (var farmer in config.FarmerOutfits)
 				{
-					outfitManager.SetOutfit(farmer.GetOutfit(Config.SeasonsEnum.All, locationManager.CurrentPlayerLocation.Value));
+					if (farmer.PlayerID == playerInfo.CurrentPlayerInfo.PlayerID)
+					{
+						outfitManager.SetOutfit(farmer, seasonManager.CurrentSeason.Value, locationManager.CurrentPlayerLocation.Value);
+					}
 				}
+			}
+			catch(Exception ex)
+			{
+				monitor.Log($"ERROR to setting outfit: {ex.Message}", LogLevel.Debug);
 			}
 		}
 
@@ -53,8 +75,8 @@ namespace AutoOutfits
 		private void OnSaveLoaded(object sender, SaveLoadedEventArgs ev)
 		{
 			playerInfo.OnSaveLoaded(sender, ev);
-			var playerStartLocation = Game1.player.currentLocation.Name;
-			locationManager = new LocationManager(playerStartLocation);
+			locationManager = new LocationManager(Game1.player.currentLocation.Name);
+			seasonManager = new SeasonManager(Game1.currentSeason);
 			outfitManager.UpdateOutfitIds();
 			config.UpdateModConfigMenu();
 		}

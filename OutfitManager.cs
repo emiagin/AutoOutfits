@@ -38,9 +38,13 @@ namespace AutoOutfits
 			}
 		}
 
-		public void SetOutfit(string outfitId)
+		public void SetOutfit(FarmerOutfit farmer, SeasonsEnum season, LocationsEnum location)
 		{
-			fashionSense.SetCurrentOutfitId(outfitId, ModEntry.modManifest);
+			string seasonOutfitId = farmer.GetOutfit(season, location);
+			string allOutfitId = farmer.GetOutfit(SeasonsEnum.All, location);
+			string outfitId = allOutfitId == "off" ? seasonOutfitId : allOutfitId;
+			if(outfitId != "off")
+				fashionSense.SetCurrentOutfitId(outfitId, ModEntry.modManifest);
 		}
 
 		public OutfitManager()
